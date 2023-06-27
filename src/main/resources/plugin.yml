@@ -1,0 +1,20 @@
+name: PlayerLeashing
+description: Allows privileged players to leash other players
+author: HIlight3R
+version: ${version}
+
+api-version: 1.18
+main: me.hilight3r.playerleashing.PlayerLeashing
+
+#depend:
+#  - ProtocolLib
+
+permissions:
+  playerleashing.use:
+    description: Allows player to leash other player
+    default: op
+  playerleashing.*:
+    description: Wildcard permission
+    default: op
+    children:
+      playerleashing.use: true
