@@ -42,25 +42,7 @@ class PlayerLeashingListener : Listener {
                 --player.inventory.itemInMainHand.amount
             }
 
-            val slime = leashedPlayer.world.spawnEntity(
-                leashedPlayer.location.add(0.0, 1.0, 0.0), EntityType.SLIME
-            ) as Slime
-
-            slime.apply {
-                size = 0
-                setAI(false)
-                setGravity(false)
-                setLeashHolder(player)
-                isInvulnerable = true
-                isCollidable = false
-                isInvisible = true
-                isSilent = true
-                setMetadata(leashedPlayer.uniqueId.toString(), FixedMetadataValue(plugin, "NoCollision"))
-            }
-
-            CollisionTeam.team.addEntry(slime.uniqueId.toString())
-            leashedPlayer.scoreboard = CollisionTeam.board
-            player.setMetadata(leashedPlayer.uniqueId.toString(), FixedMetadataValue(plugin, "Holder"))
+            spawnSlimeTo(leashedPlayer)
 
             object : BukkitRunnable() {
                 override fun run() {
@@ -90,28 +72,10 @@ class PlayerLeashingListener : Listener {
     }
 
     @EventHandler
-    fun onPlayerDeathEvent(event: PlayerDeathEvent) {
-        if (leashed.contains(event.entity.uniqueId.toString())) {
-            val leashedPlayer = event.entity
-            for (player in Bukkit.getOnlinePlayers()) {
-                if (player.hasMetadata(leashedPlayer.uniqueId.toString())) {
-                    unleashPlayer(leashedPlayer, player)
-                }
-            }
-        }
-    }
+    fun onPlayerDeathEvent(event: PlayerDeathEvent) = unleashAllRelated(event.entity)
 
     @EventHandler
-    fun onPlayerQuitEvent(event: PlayerQuitEvent) {
-        if (leashed.contains(event.player.uniqueId.toString())) {
-            val leashedPlayer = event.player
-            for (player in Bukkit.getOnlinePlayers()) {
-                if (player.hasMetadata(leashedPlayer.uniqueId.toString())) {
-                    unleashPlayer(leashedPlayer, player)
-                }
-            }
-        }
-    }
+    fun onPlayerQuitEvent(event: PlayerQuitEvent) = unleashAllRelated(event.player)
 
     @EventHandler
     fun onHangingPlaceEvent(event: HangingPlaceEvent) {
@@ -136,5 +100,37 @@ class PlayerLeashingListener : Listener {
                 }
             }
         }
+    }
+
+    private fun unleashAllRelated(player: Player) {
+        if (leashed.contains(player.uniqueId.toString())) {
+            for (otherPlayer in Bukkit.getOnlinePlayers()) {
+                if (otherPlayer.hasMetadata(player.uniqueId.toString())) {
+                    unleashPlayer(player, otherPlayer)
+                }
+            }
+        }
+    }
+
+    private fun spawnSlimeTo(player: Player) {
+        val slime = player.world.spawnEntity(
+            player.location.add(0.0, 1.0, 0.0), EntityType.SLIME
+        ) as Slime
+
+        slime.apply {
+            size = 0
+            setAI(false)
+            setGravity(false)
+            setLeashHolder(player)
+            isInvulnerable = true
+            isCollidable = false
+            isInvisible = true
+            isSilent = true
+            setMetadata(player.uniqueId.toString(), FixedMetadataValue(plugin, "NoCollision"))
+        }
+
+        CollisionTeam.team.addEntry(slime.uniqueId.toString())
+        player.scoreboard = CollisionTeam.board
+        player.setMetadata(player.uniqueId.toString(), FixedMetadataValue(plugin, "Holder"))
     }
 }
