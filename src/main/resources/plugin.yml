@@ -1,20 +1,15 @@
 name: PlayerLeashing
-description: Allows privileged players to leash other players
+description: A simple Minecraft plugin for vanilla and SMP servers, which makes it possible to leash a player
 author: HIlight3R
 version: ${version}
 
-api-version: 1.18
+api-version: 1.17
 main: me.hilight3r.playerleashing.PlayerLeashing
-
-#depend:
-#  - ProtocolLib
 
 permissions:
   playerleashing.use:
-    description: Allows player to leash other player
-    default: op
+    description: Allows you to leash player
   playerleashing.*:
-    description: Wildcard permission
-    default: op
+    description: All the above permissions
     children:
       playerleashing.use: true
